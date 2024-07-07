@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
 
 // fetching the partners from database
 app.get('/partners',(req,res)=>{
-const sql = "SELECT locations.name, locations.type ,locations.opening_hours,locations.tel,locations.google_maps_url, sites.url FROM locations INNER JOIN sites ON locations.site_id = sites.id WHERE locations.type = 'Partner'";
+const sql = "SELECT locations.name, locations.type ,locations.opening_hours,locations.tel,locations.google_maps_url, sites.url FROM locations INNER JOIN sites ON locations.address = sites.id WHERE locations.type = 'Partner'";
 db.query(sql,(err,result)=>{
     if(err){
         return res.status(500).json({error:err.message})
@@ -21,18 +21,32 @@ db.query(sql,(err,result)=>{
 })
 })
 
-// fetching the drop down location from the database
-app.get('/dropLocation/:region', (req, res) => {
-    const region = req.params.region;
-    const sql = 'SELECT * FROM drop_off_locations WHERE region = ?';
-    
-    db.query(sql, [region], (err, result) => {
+
+app.get('/dropLocation', (req, res) => {
+    const region = req.query.region;
+    const countryCode = req.query.countryCode;
+    let sql = 'SELECT * FROM drop_off_locations WHERE 1=1';
+    let params = [];
+
+    if (region) {
+        sql += ' AND region = ?';
+        params.push(region);
+    }
+
+    if (countryCode) {
+        sql += ' AND countryCode = ?';
+        params.push(countryCode);
+    }
+
+    db.query(sql, params, (err, result) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
         res.json(result);
     });
 });
+
+
 
 
 //fetching the region from the database
@@ -50,8 +64,7 @@ app.get('/region', (req, res) => {
 
 
 // Define the port number
-const PORT =3000;
-
+const PORT =3000
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
