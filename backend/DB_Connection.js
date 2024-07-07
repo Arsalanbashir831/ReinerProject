@@ -2,10 +2,10 @@ const mysql = require('mysql');
 
 // MySQL database connection configuration
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'reinerdb'
+    host: 'sql157.your-server.de',
+    user: 'gndata_r',
+    password: 'P97l69iu50klVuE8',
+    database: 'gndata'
 });
 
 // Connect to the database
