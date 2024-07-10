@@ -11,49 +11,22 @@ app.get('/', (req, res) => {
 });
 
 // fetching the partners from database
-app.get('/partners',(req,res)=>{
-const sql = "SELECT locations.name, locations.type ,locations.opening_hours,locations.tel,locations.google_maps_url, sites.url FROM locations INNER JOIN sites ON locations.address = sites.id WHERE locations.type = 'Partner'";
-db.query(sql,(err,result)=>{
-    if(err){
-        return res.status(500).json({error:err.message})
+app.get('/partners', (req, res) => {
+    const { country, region } = req.query;
+    let sql = `SELECT locations.name, locations.type, locations.opening_hours, locations.tel,
+                    locations.google_maps_url, sites.url, locations.country, drop_off_locations.region
+                FROM locations 
+                INNER JOIN sites ON locations.address = sites.id 
+                INNER JOIN drop_off_locations ON locations.location = drop_off_locations.nr 
+                WHERE locations.type = 'Partner'`;
+
+    if (country) {
+        sql += ` AND locations.country = ${db.escape(country)}`;
     }
-    res.json(result);
-})
-})
-
-
-app.get('/dropLocation', (req, res) => {
-    const region = req.query.region;
-    const countryCode = req.query.countryCode;
-    let sql = 'SELECT * FROM drop_off_locations WHERE 1=1';
-    let params = [];
-
     if (region) {
-        sql += ' AND region = ?';
-        params.push(region);
+        sql += ` AND drop_off_locations.region = ${db.escape(region)}`;
     }
 
-    if (countryCode) {
-        sql += ' AND countryCode = ?';
-        params.push(countryCode);
-    }
-
-    db.query(sql, params, (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        res.json(result);
-    });
-});
-
-
-
-
-//fetching the region from the database
-app.get('/region', (req, res) => {
-   
-    const sql = "SELECT DISTINCT region FROM drop_off_locations WHERE region <> '';"
-    
     db.query(sql, (err, result) => {
         if (err) {
             return res.status(500).json({ error: err.message });
