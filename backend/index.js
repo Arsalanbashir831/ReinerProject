@@ -36,6 +36,24 @@ app.get('/partners', (req, res) => {
 });
 
 
+app.get('/regions', (req, res) => {
+    const { country } = req.query;
+
+    if (!country) {
+        return res.status(400).json({ error: "Country code is required" });
+    }
+
+    let sql = `SELECT DISTINCT region FROM drop_off_locations WHERE countryCode = ${db.escape(country)}`;
+
+    db.query(sql, (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(result);
+    });
+});
+
+
 // Define the port number
 const PORT =3008
 // Start the server
